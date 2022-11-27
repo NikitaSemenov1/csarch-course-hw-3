@@ -5,6 +5,13 @@
 
 double f(double, double);
 
+double gen_double() {
+    srand(time(NULL));
+    double num = rand() % 2000 - 1000;
+    double denom = rand() % 1000 + 1;
+    return num / denom;
+}
+
 int main(int argc, char *argv[]) {
 
     FILE *fin, *fout;
@@ -27,13 +34,25 @@ int main(int argc, char *argv[]) {
         }
         fin = fopen(argv[4], "r");
         fout = fopen(argv[5], "w");
+    } else if (!strcmp(argv[3], "-g")) {
+        if (argc < 5) {
+            fprintf(stderr, "Output file is not provided\n");
+            return 1;
+        }
+        fin = NULL;
+        fout = fopen(argv[4], "w");
     } else {
         fprintf(stderr, "Invalid parameter\n");
     }
     
     double x;
-    fscanf(fin, "%lf", &x);
-    
+    if (fin == NULL) {
+        x = gen_double();
+        printf("%f\n", x);
+    } else {
+        fscanf(fin, "%lf", &x);
+    }
+
     double res = -1;
     clock_t start = clock();
     for (int i = 0; i < iterations; i++) {
@@ -44,7 +63,7 @@ int main(int argc, char *argv[]) {
     fprintf(fout, "%f\n", res);
     fprintf(fout, "The time of the calculating of %d iterations: %f clocks or %f seconds\n", iterations, (double)(end - start), (end - start) / (double)CLOCKS_PER_SEC);
 
-    if (fin != stdin) {
+    if (fin != stdin && fin != NULL) {
         fclose(fin);
     }
     if (fout != stdout) {
